@@ -33,7 +33,7 @@ JSON data format for each call
     }
 }
 
-/api/product updated
+/api/product_update/:id
 {
     "Username": "test",
     "Password": "test"
@@ -60,6 +60,9 @@ JSON data format for each call
 
     }
 }
+
+/api/products/:id
+
 
 
 Calls:

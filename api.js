@@ -136,6 +136,38 @@ router.get("/api/product/:id",function(req,res){
 	});
 });
 
+// Allows a user to see  their
+router.get("/api/user_profile",function(req,res){
+
+	  console.log(req.body)
+		// Loads the hash
+		global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
+		function (error, results, fields) {
+
+			console.log(results);
+			// checking that the username exists
+			if(typeof results[0] !== 'undefined' && results[0]) {
+
+				// check password
+				hash = results[0].Password;
+				bcrypt.compare(req.body.Password, hash, function(err, resi) {
+
+					if(resi) {
+
+						global.connection.query('call getUserProfile(?)', results[0].UserID, function (error, results, fields) {
+							if (error) throw error;
+							res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
+						});
+
+					} else {
+						res.send(JSON.stringify({"status": 202, "error": true, "response": "wrong password"}));
+					}
+				});
+			} else {
+				res.send(JSON.stringify({"status": 203, "error": true, "response": "username does not exist"}));
+			}
+		});
+	});
 
 // Allows a user to see all their own data
 router.get("/api/user",function(req,res){
@@ -145,6 +177,7 @@ router.get("/api/user",function(req,res){
 		global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
 		function (error, results, fields) {
 
+			console.log(results);
 			// checking that the username exists
 			if(typeof results[0] !== 'undefined' && results[0]) {
 
@@ -264,7 +297,30 @@ router.put("/api/product_update/:id",function(req,res){
 	});
 });
 
+// EDIT THIS
+// POST -- create new user
+router.post("/api/user_create",function(req,res){
 
+
+			console.log(req.body)
+
+			new_user = req.body;
+			bcrypt.hash(new_user.Password, saltRounds, function(err, password_hash) {
+
+				new_user.Password = password_hash;
+
+
+					// Update the DB
+					global.connection.query('insert into FoodSurplus_sp20.Users SET ?',[new_user], function (error, results, fields) {
+						if (error) {
+							console.log(error)
+							res.send(JSON.stringify({"status": 201, "error": true, "response": "invalid query"}));
+						}
+						else {
+							res.send(JSON.stringify({"status": 200, "error": null, "response": "here on a post -- created User"}));
+						}});
+			});
+});
 
 // POST -- create new restaurant, return location of new restaurant in location header, return status code 200 if successful
 router.post("/api/product_create",function(req,res){
