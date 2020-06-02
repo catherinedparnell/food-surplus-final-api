@@ -33,7 +33,7 @@ app.use(function(req, res, next){
 	next();
 });
 
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // set up router
@@ -54,7 +54,7 @@ router.get("/api/",function(req,res){
 });
 
 // GET - get supply or demand depending on the type of user asking
-router.get("/api/product",function(req,res){
+router.post("/api/product",function(req,res){
 
   console.log(req.body)
 	// Loads the hash
@@ -101,7 +101,7 @@ router.get("/api/product",function(req,res){
 });
 
 // GET - get a specific product
-router.get("/api/product/:id",function(req,res){
+router.post("/api/product/:id",function(req,res){
 
   console.log(req.body)
 	// Loads the hash
@@ -170,7 +170,7 @@ router.get("/api/user_profile",function(req,res){
 	});
 
 // Allows a user to see all their own data
-router.get("/api/user",function(req,res){
+router.post("/api/user",function(req,res){
 
 	  console.log(req.body)
 		// Loads the hash
@@ -324,23 +324,23 @@ router.post("/api/user_create",function(req,res){
 
 // POST -- create new restaurant, return location of new restaurant in location header, return status code 200 if successful
 router.post("/api/product_create",function(req,res){
-
+	console.log(req.body)
 	// Loads the hash
 	global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
 	function (error, results, fields) {
 
 		// checking that the username exists
 		if(typeof results[0] !== 'undefined' && results[0]) {
-
+            console.log('results', results)
 			// check password
 			hash = results[0].Password;
 			bcrypt.compare(req.body.Password, hash, function(err, resi) {
 
-				console.log(req.body.data)
+				console.log(req.body)
 
 				if(resi) {
 					// Update the DB
-					global.connection.query('call createProductEntry(?, ?, ?, ?, ?, ?, ?)',[req.body.data.ProductName, req.body.data.BrandName, req.body.data.SellBy, req.body.data.SupplyDemand, req.body.data.Qty, req.body.data.Organic, results[0].UserID], function (error, results, fields) {
+					global.connection.query('call createProductEntry(?, ?, ?, ?, ?, ?, ?)',[req.body.ProductName, req.body.BrandName, req.body.SellBy, req.body.SupplyDemand, req.body.Qty, req.body.Organic, results[0].UserID], function (error, results, fields) {
 						if (error) {
 							console.log(error)
 							res.send(JSON.stringify({"status": 201, "error": true, "response": "invalid query"}));
@@ -390,7 +390,25 @@ router.delete("/api/products/:id",function(req,res){
 	});
 });
 
-
+app.use(function (req, res, next) {
+	/*var err = new Error('Not Found');
+	 err.status = 404;
+	 next(err);*/
+  
+	// Website you wish to allow to connect
+	res.setHeader('Access-Control-Allow-Origin', '*');
+  
+	// Request methods you wish to allow
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  
+	// Request headers you wish to allow
+	res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers,X-Access-Token,XKey,Authorization');
+  
+  //  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+  
+	// Pass to next layer of middleware
+	next();
+  });
 
 
 // start server running on port 3000 (or whatever is set in env)
