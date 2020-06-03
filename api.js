@@ -1,11 +1,5 @@
-/* 	Node API demo
-	Author: Tim Pierson, Dartmouth CS61, Spring 2020
-
-	Add config.js file to root directory
-	To run: nodemon api.js <local|sunapee>
-	App will use the database credentials and port stored in config.js for local or sunapee server
-	Recommend Postman app for testing verbs other than GET, find Postman at https://www.postman.com/
-*/
+// Authors: Connor Quigley, Catherine Parnell, Satch Baker, Archer Chapin
+// Based on the lab3 scaffold
 
 // bcrypt for password storage
 const bcrypt = require('bcrypt');
@@ -46,9 +40,6 @@ router.use(function (req,res,next) {
 });
 
 // set up routing
-// calls should be made to /api/restaurants with GET/PUT/POST/DELETE verbs
-// you can test GETs with a browser using URL http://localhost:3000/api/restaurants or http://localhost:3000/api/restaurants/30075445
-// recommend Postman app for testing other verbs, find it at https://www.postman.com/
 router.get("/api/",function(req,res){
 	res.send("Yo!  This my API.  Call it right, or don't call it at all!");
 });
@@ -132,7 +123,7 @@ router.post("/api/product/:id",function(req,res){
 	});
 });
 
-// Allows a user to see  their
+// Allows a user to see  their profile
 router.post("/api/user_profile",function(req,res){
 
 		// Loads the hash
@@ -242,7 +233,7 @@ router.put("/api/user_update",function(req,res){
 	});
 });
 
-
+// update a specific product
 router.post("/api/product_update/:id",function(req,res){
 
 
@@ -287,7 +278,6 @@ router.post("/api/product_update/:id",function(req,res){
 	});
 });
 
-// EDIT THIS
 // POST -- create new user
 router.post("/api/user_create",function(req,res){
 
@@ -308,7 +298,7 @@ router.post("/api/user_create",function(req,res){
 			});
 });
 
-// POST -- create new restaurant, return location of new restaurant in location header, return status code 200 if successful
+// POST -- create new product
 router.post("/api/product_create",function(req,res){
 	console.log(req.body)
 	// Loads the hash
@@ -360,7 +350,7 @@ router.post("/api/products/:id",function(req,res){
 
 					global.connection.query('DELETE FROM  FoodSurplus_sp20.Products WHERE ProductID = ?',[req.params.id], function (error, results, fields) {
 						if (error) throw error;
-						res.send(JSON.stringify({"status": 200, "error": null, "response": "here on a delete -- remove restaurant with RestaurantID=" + req.params.id}));
+						res.send(JSON.stringify({"status": 200, "error": null, "response": "here on a delete -- remove product with ProductID=" + req.params.id}));
 					});
 
 				} else {
