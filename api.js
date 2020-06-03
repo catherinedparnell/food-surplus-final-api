@@ -54,9 +54,8 @@ router.get("/api/",function(req,res){
 });
 
 // GET - get supply or demand depending on the type of user asking
-router.get("/api/product",function(req,res){
+router.post("/api/product",function(req,res){
 
-  console.log(req.body)
 	// Loads the hash
 	global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
 	function (error, results, fields) {
@@ -74,7 +73,6 @@ router.get("/api/product",function(req,res){
 					if(results[0].Role == "S") {
 
 						// Supplier wants to see demand
-						console.log("S");
 						global.connection.query('call getSupplyDemand(?)','D', function (error, results, fields) {
 							if (error) throw error;
 							res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
@@ -83,7 +81,6 @@ router.get("/api/product",function(req,res){
 					} else if (results[0].Role == "D") {
 
 						// Demander wants to see supply
-						console.log("D");
 						global.connection.query('call getSupplyDemand(?)','S', function (error, results, fields) {
 							if (error) throw error;
 							res.send(JSON.stringify({"status": 200, "error": null, "response": results}));
@@ -101,9 +98,8 @@ router.get("/api/product",function(req,res){
 });
 
 // GET - get a specific product
-router.get("/api/product/:id",function(req,res){
+router.post("/api/product/:id",function(req,res){
 
-  console.log(req.body)
 	// Loads the hash
 	global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
 	function (error, results, fields) {
@@ -137,14 +133,12 @@ router.get("/api/product/:id",function(req,res){
 });
 
 // Allows a user to see  their
-router.get("/api/user_profile",function(req,res){
+router.post("/api/user_profile",function(req,res){
 
-	  console.log(req.body)
 		// Loads the hash
 		global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
 		function (error, results, fields) {
 
-			console.log(results);
 			// checking that the username exists
 			if(typeof results[0] !== 'undefined' && results[0]) {
 
@@ -170,14 +164,12 @@ router.get("/api/user_profile",function(req,res){
 	});
 
 // Allows a user to see all their own data
-router.get("/api/user",function(req,res){
+router.post("/api/user",function(req,res){
 
-	  console.log(req.body)
 		// Loads the hash
 		global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
 		function (error, results, fields) {
 
-			console.log(results);
 			// checking that the username exists
 			if(typeof results[0] !== 'undefined' && results[0]) {
 
@@ -206,6 +198,7 @@ router.get("/api/user",function(req,res){
 // PUT - UPDATE user's user data
 router.put("/api/user_update",function(req,res){
 
+
 	// Loads the hash
 	global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
 	function (error, results, fields) {
@@ -227,7 +220,6 @@ router.put("/api/user_update",function(req,res){
 						// if password was updated
 						if(typeof password_hash !== 'undefined' && password_hash) {
 							updated_user.Password = password_hash;
-							console.log(password_hash)
 						}
 
 						// Update the DB
@@ -251,7 +243,8 @@ router.put("/api/user_update",function(req,res){
 });
 
 
-router.put("/api/product_update/:id",function(req,res){
+router.post("/api/product_update/:id",function(req,res){
+
 
 	// Loads the hash
 	global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
@@ -268,16 +261,13 @@ router.put("/api/product_update/:id",function(req,res){
 
 
 					update_data = {};
-					if (req.body.data.SellBy !== '' && req.body.data.SellBy !== null)  {
-						update_data.SellBy = req.body.data.SellBy
-						console.log(update_data)
+					if (req.body.SellBy !== '' && req.body.SellBy !== null)  {
+						update_data.SellBy = req.body.SellBy
 					}
-					if (req.body.data.Qty !== '' && req.body.data.Qty !== null)  {
-						update_data.Qty = req.body.data.Qty
-						console.log(update_data)
+					if (req.body.Qty !== '' && req.body.Qty !== null)  {
+						update_data.Qty = req.body.Qty
 					}
 
-					console.log(req.params.id)
 					// Update the DB
 					global.connection.query('UPDATE FoodSurplus_sp20.Products SET ? WHERE ProductID = ?',[update_data, req.params.id], function (error, results, fields) {
 						if (error) {
@@ -301,9 +291,6 @@ router.put("/api/product_update/:id",function(req,res){
 // POST -- create new user
 router.post("/api/user_create",function(req,res){
 
-
-			console.log(req.body)
-
 			new_user = req.body;
 			bcrypt.hash(new_user.Password, saltRounds, function(err, password_hash) {
 
@@ -313,7 +300,6 @@ router.post("/api/user_create",function(req,res){
 					// Update the DB
 					global.connection.query('insert into FoodSurplus_sp20.Users SET ?',[new_user], function (error, results, fields) {
 						if (error) {
-							console.log(error)
 							res.send(JSON.stringify({"status": 201, "error": true, "response": "invalid query"}));
 						}
 						else {
@@ -336,13 +322,10 @@ router.post("/api/product_create",function(req,res){
 			hash = results[0].Password;
 			bcrypt.compare(req.body.Password, hash, function(err, resi) {
 
-				console.log(req.body.data)
-
 				if(resi) {
 					// Update the DB
-					global.connection.query('call createProductEntry(?, ?, ?, ?, ?, ?, ?)',[req.body.data.ProductName, req.body.data.BrandName, req.body.data.SellBy, req.body.data.SupplyDemand, req.body.data.Qty, req.body.data.Organic, results[0].UserID], function (error, results, fields) {
+					global.connection.query('call createProductEntry(?, ?, ?, ?, ?, ?, ?)',[req.body.ProductName, req.body.BrandName, req.body.SellBy, req.body.SupplyDemand, req.body.Qty, req.body.Organic, results[0].UserID], function (error, results, fields) {
 						if (error) {
-							console.log(error)
 							res.send(JSON.stringify({"status": 201, "error": true, "response": "invalid query"}));
 						}
 						else {
@@ -360,8 +343,8 @@ router.post("/api/product_create",function(req,res){
 	});
 });
 
-router.delete("/api/products/:id",function(req,res){
-	console.log(req.body)
+router.post("/api/products/:id",function(req,res){
+
 	// Loads the hash
 	global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
 	function (error, results, fields) {
@@ -390,6 +373,25 @@ router.delete("/api/products/:id",function(req,res){
 	});
 });
 
+app.use(function (req, res, next) {
+	/*var err = new Error('Not Found');
+	 err.status = 404;
+	 next(err);*/
+
+	// Website you wish to allow to connect
+	res.setHeader('Access-Control-Allow-Origin', '*');
+
+	// Request methods you wish to allow
+	res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+
+	// Request headers you wish to allow
+	res.setHeader('Access-Control-Allow-Headers', 'Access-Control-Allow-Headers, Origin,Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers,X-Access-Token,XKey,Authorization');
+
+  //  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
+
+	// Pass to next layer of middleware
+	next();
+  });
 
 
 
