@@ -33,7 +33,7 @@ app.use(function(req, res, next){
 	next();
 });
 
-app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // set up router
@@ -310,14 +310,14 @@ router.post("/api/user_create",function(req,res){
 
 // POST -- create new restaurant, return location of new restaurant in location header, return status code 200 if successful
 router.post("/api/product_create",function(req,res){
-
+	console.log(req.body)
 	// Loads the hash
 	global.connection.query('SELECT UserID, Username, Password, Role  FROM FoodSurplus_sp20.Users where Username like ?', [req.body.Username],
 	function (error, results, fields) {
 
 		// checking that the username exists
 		if(typeof results[0] !== 'undefined' && results[0]) {
-
+            console.log('results', results)
 			// check password
 			hash = results[0].Password;
 			bcrypt.compare(req.body.Password, hash, function(err, resi) {
